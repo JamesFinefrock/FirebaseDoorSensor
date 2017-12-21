@@ -15,7 +15,6 @@
 #define DOOR_ID ""
 #define DOOR_NAME ""
 
-
 const int switchPin = 1;
 int lastState = LOW;
 
@@ -25,6 +24,8 @@ void setup() {
   connectWifi();
 
   Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+
+  initializeDB();
 
   pinMode(switchPin, INPUT);
 }
@@ -51,5 +52,11 @@ void connectWifi() {
   Serial.println();
   Serial.print("connected: ");
   Serial.println(WiFi.localIP());
+}
+
+void initializeDB() {
+  Firebase.setInt(FB_PATH DOOR_ID ID_PATH, atoi(DOOR_ID));
+  Firebase.setString(FB_PATH DOOR_ID NAME_PATH, DOOR_NAME);
+  Firebase.setBool(FB_PATH DOOR_ID OPEN_PATH, false);
 }
 
