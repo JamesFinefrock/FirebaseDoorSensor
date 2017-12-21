@@ -29,9 +29,8 @@ void setup() {
 
   Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
   initializeDB();
-  sendFCM();
 
-  //pinMode(switchPin, INPUT);
+  pinMode(switchPin, INPUT);
 }
 
 void loop() {
@@ -40,6 +39,11 @@ void loop() {
   if(curState != lastState) {
     boolean isOpen = curState == HIGH ? true : false;
     Firebase.setBool(FB_PATH DOOR_ID OPEN_PATH, isOpen);
+
+    if(isOpen) {
+      sendFCM();
+    }
+    
     lastState = curState;
   }
   
@@ -69,10 +73,9 @@ void sendFCM() {
   WiFiClientSecure client;
   
   String data = "{";
-  data = data + "\"to\": \"/topics/security\",";
+  data = data + "\"to\": \"/topics/" FCM_TOPIC "\",";
   data = data + "\"data\": {";
-  data = data + "\"Nick\": \"asdsadsa\",";
-  data = data + "\"Body\" : \"Some Test\" ";
+  data = data + "\"name\" : \"" DOOR_NAME "\" ";
   data = data + "} }";
   
   Serial.println("Send data...");
@@ -95,6 +98,7 @@ void sendFCM() {
    char c = client.read();
    Serial.print(c);
   }
+  
   Serial.println("Finished!");
   client.flush();
   client.stop();
