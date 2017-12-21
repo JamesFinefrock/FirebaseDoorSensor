@@ -58,5 +58,6 @@ void initializeDB() {
   Firebase.setInt(FB_PATH DOOR_ID ID_PATH, atoi(DOOR_ID));
   Firebase.setString(FB_PATH DOOR_ID NAME_PATH, DOOR_NAME);
   Firebase.setBool(FB_PATH DOOR_ID OPEN_PATH, false);
+  Firebase.setString(FB_PATH DOOR_ID LASTOPENED_PATH, "");
 }
 
