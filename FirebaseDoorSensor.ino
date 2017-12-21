@@ -1,10 +1,14 @@
 #include <ESP8266WiFi.h>
+#include <FirebaseArduino.h>
 
 #define WIFI_SSID ""
 #define WIFI_PASSWORD ""
+#define FIREBASE_HOST ""
+#define FIREBASE_AUTH ""
+#define FB_PATH ""
 
 const int switchPin = 1;
-int lastState = 0;
+int lastState = LOW;
 
 void setup() {
   Serial.begin(115200);
@@ -20,11 +24,18 @@ void setup() {
   Serial.print("connected: ");
   Serial.println(WiFi.localIP());
 
-  pinMode(switchPin, INPUT);
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
 
+  pinMode(switchPin, INPUT);
 }
 
 void loop() {
-  int curState = digitalRead(switchPin) == LOW ? 0 : 1;
+  int curState = digitalRead(switchPin);
+  if(curState != lastState) {
+    boolean isOpen = curState == HIGH ? true : false;
+    Firebase.setBool(FB_PATH, isOpen);
+    lastState = curState;
+  }
   
+  delay(500);
 }
