@@ -112,39 +112,50 @@ int getTime() {
   char* host = "api.timezonedb.com";
   String url = "/v2/get-time-zone?key=" TIME_API_KEY "&format=json&by=zone&zone=America/New_York";
 
-  Serial.printf("\n[Connecting to %s ... ", host);
-  if (client.connect(host, 80))
-  {
-    Serial.println("connected]");
+  int attempt = 0;
+  while(attempt < 3) {
 
-    Serial.println("[Sending a request]");
-    client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-                 "Host: " + host + "\r\n" +
-                 "Connection: close\r\n" +
-                 "\r\n"
-                );
-
-    Serial.println("[Response:]");
-    String response = "";
-    while (client.connected())
+    if(attempt != 0) {
+      delay(400);
+    }
+    
+    Serial.printf("\n[Connecting to %s ... ", host);
+    if (client.connect(host, 80))
     {
-      if (client.available())
+      Serial.println("connected]");
+  
+      Serial.println("[Sending a request]");
+      client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+                   "Host: " + host + "\r\n" +
+                   "Connection: close\r\n" +
+                   "\r\n"
+                  );
+  
+      Serial.println("[Response:]");
+      String response = "";
+      while (client.connected())
       {
-        String line = client.readStringUntil('\n');
-        //Serial.println(line);
-        response = response + line;
+        if (client.available())
+        {
+          String line = client.readStringUntil('\n');
+          response = response + line;
+        }
+      }
+      client.stop();
+      Serial.println("\n[Disconnected]");
+      if(response.indexOf("\"timestamp\":") != -1) {
+        response = response.substring(response.indexOf("timestamp\":"));
+        timestamp = response.substring(response.indexOf(":") + 1, response.indexOf(",")).toInt();
+        Serial.println(timestamp);
+        attempt = 3;
       }
     }
-    client.stop();
-    Serial.println("\n[Disconnected]");
-    response = response.substring(response.indexOf("timestamp\":"));
-    timestamp = response.substring(response.indexOf(":") + 1, response.indexOf(",")).toInt();
-    Serial.println(timestamp);
-  }
-  else
-  {
-    Serial.println("connection failed!]");
-    client.stop();
+    else
+    {
+      Serial.println("connection failed!]");
+      client.stop();
+    }
+    attempt++;
   }
 
   return timestamp;
