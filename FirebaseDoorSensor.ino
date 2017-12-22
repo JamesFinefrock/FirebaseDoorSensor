@@ -28,8 +28,6 @@ void setup() {
 
   connectWifi();
 
-  getTime();
-
   Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
   initializeDB();
 
@@ -44,6 +42,7 @@ void loop() {
     Firebase.setBool(FB_PATH DOOR_ID OPEN_PATH, isOpen);
 
     if(isOpen) {
+      Firebase.setInt(FB_PATH DOOR_ID LASTOPENED_PATH, getTime());
       sendFCM();
     }
     
@@ -69,7 +68,7 @@ void initializeDB() {
   Firebase.setInt(FB_PATH DOOR_ID ID_PATH, atoi(DOOR_ID));
   Firebase.setString(FB_PATH DOOR_ID NAME_PATH, DOOR_NAME);
   Firebase.setBool(FB_PATH DOOR_ID OPEN_PATH, false);
-  Firebase.setString(FB_PATH DOOR_ID LASTOPENED_PATH, "");
+  Firebase.setInt(FB_PATH DOOR_ID LASTOPENED_PATH, 0);
 }
 
 void sendFCM() {
@@ -107,7 +106,8 @@ void sendFCM() {
   client.stop();
 }
 
-String getTime() {
+int getTime() {
+  int timestamp = 0;
   WiFiClient client;
   char* host = "api.timezonedb.com";
   String url = "/v2/get-time-zone?key=" TIME_API_KEY "&format=json&by=zone&zone=America/New_York";
@@ -125,21 +125,28 @@ String getTime() {
                 );
 
     Serial.println("[Response:]");
+    String response = "";
     while (client.connected())
     {
       if (client.available())
       {
         String line = client.readStringUntil('\n');
-        Serial.println(line);
+        //Serial.println(line);
+        response = response + line;
       }
     }
     client.stop();
     Serial.println("\n[Disconnected]");
+    response = response.substring(response.indexOf("timestamp\":"));
+    timestamp = response.substring(response.indexOf(":") + 1, response.indexOf(",")).toInt();
+    Serial.println(timestamp);
   }
   else
   {
     Serial.println("connection failed!]");
     client.stop();
   }
+
+  return timestamp;
 }
 
