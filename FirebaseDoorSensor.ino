@@ -4,6 +4,8 @@
 #define WIFI_SSID ""
 #define WIFI_PASSWORD ""
 
+#define TIME_API_KEY ""
+
 #define FCM_SERVER_KEY ""
 #define FCM_TOPIC ""
 
@@ -25,6 +27,8 @@ void setup() {
   Serial.begin(115200);
 
   connectWifi();
+
+  getTime();
 
   Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
   initializeDB();
@@ -101,5 +105,41 @@ void sendFCM() {
   Serial.println("Finished!");
   client.flush();
   client.stop();
+}
+
+String getTime() {
+  WiFiClient client;
+  char* host = "api.timezonedb.com";
+  String url = "/v2/get-time-zone?key=" TIME_API_KEY "&format=json&by=zone&zone=America/New_York";
+
+  Serial.printf("\n[Connecting to %s ... ", host);
+  if (client.connect(host, 80))
+  {
+    Serial.println("connected]");
+
+    Serial.println("[Sending a request]");
+    client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+                 "Host: " + host + "\r\n" +
+                 "Connection: close\r\n" +
+                 "\r\n"
+                );
+
+    Serial.println("[Response:]");
+    while (client.connected())
+    {
+      if (client.available())
+      {
+        String line = client.readStringUntil('\n');
+        Serial.println(line);
+      }
+    }
+    client.stop();
+    Serial.println("\n[Disconnected]");
+  }
+  else
+  {
+    Serial.println("connection failed!]");
+    client.stop();
+  }
 }
 
