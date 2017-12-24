@@ -36,20 +36,24 @@ void setup() {
 
 void loop() {
   int curState = digitalRead(switchPin);
+
+  if(WiFi.status() != WL_CONNECTED) {
+    connectWifi();
+  }
   
   if(curState != lastState) {
     boolean isOpen = curState == HIGH ? true : false;
     Firebase.setBool(FB_PATH DOOR_ID OPEN_PATH, isOpen);
 
     if(isOpen) {
-      Firebase.setInt(FB_PATH DOOR_ID LASTOPENED_PATH, getTime());
       sendFCM();
+      Firebase.setInt(FB_PATH DOOR_ID LASTOPENED_PATH, getTime());
     }
     
     lastState = curState;
   }
   
-  delay(500);
+  delay(100);
 }
 
 void connectWifi() {
