@@ -20,7 +20,7 @@
 #define DOOR_ID ""
 #define DOOR_NAME ""
 
-const int switchPin = 1;
+const int switchPin = 3;
 int lastState = LOW;
 
 void setup() {
