@@ -98,14 +98,7 @@ void sendFCM() {
     client.println(data);
   }
   
-  Serial.println("Data sent...Reading response..");
-  
-  while (client.available()) {
-   char c = client.read();
-   Serial.print(c);
-  }
-  
-  Serial.println("Finished!");
+  Serial.println("Data sent");
   client.flush();
   client.stop();
 }
